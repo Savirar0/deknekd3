@@ -1,31 +1,25 @@
-// ─────────────────────────────────────────────
-//  UPLOAD.JS — Upload a new 3D model
-// ─────────────────────────────────────────────
+let currentUser = null;
+let modelFile = null;
+let thumbFile = null;
 
-let currentUser  = null;
-let modelFile    = null;
-let thumbFile    = null;
+const form = document.getElementById('upload-form');
+const submitBtn = document.getElementById('submit-btn');
+const msgEl = document.getElementById('msg');
 
-const form       = document.getElementById('upload-form');
-const submitBtn  = document.getElementById('submit-btn');
-const msgEl      = document.getElementById('msg');
-
-// ─── Init ───
 async function init() {
-  currentUser = await requireAuth(); // redirects to login if not logged in
+  currentUser = await requireAuth();
   if (!currentUser) return;
   await initNav();
   setupDropZones();
 }
 
-// ─── Drag & drop zones ───
 function setupDropZones() {
-  setupDrop('model-drop',  'model-file-input',  'model-selected',  (f) => { modelFile = f; });
-  setupDrop('thumb-drop',  'thumb-file-input',  'thumb-selected',  (f) => { thumbFile = f; });
+  setupDrop('model-drop', 'model-file-input', 'model-selected', (f) => { modelFile = f; });
+  setupDrop('thumb-drop', 'thumb-file-input', 'thumb-selected', (f) => { thumbFile = f; });
 }
 
 function setupDrop(dropId, inputId, labelId, onFile) {
-  const zone  = document.getElementById(dropId);
+  const zone = document.getElementById(dropId);
   const input = document.getElementById(inputId);
   const label = document.getElementById(labelId);
 
@@ -51,14 +45,13 @@ function setupDrop(dropId, inputId, labelId, onFile) {
   });
 }
 
-// ─── Submit ───
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   clearMsg();
 
   const title = document.getElementById('title').value.trim();
-  const desc  = document.getElementById('description').value.trim();
-  const tags  = document.getElementById('tags').value
+  const desc = document.getElementById('description').value.trim();
+  const tags = document.getElementById('tags').value
     .split(',')
     .map(t => t.trim())
     .filter(Boolean);
@@ -70,8 +63,7 @@ form.addEventListener('submit', async (e) => {
   submitBtn.textContent = 'Uploading...';
 
   try {
-    // 1. Upload model file to storage
-    const modelExt  = modelFile.name.split('.').pop();
+    const modelExt = modelFile.name.split('.').pop();
     const modelPath = `${currentUser.id}/${Date.now()}.${modelExt}`;
 
     const { error: modelUploadError } = await db.storage
@@ -84,58 +76,54 @@ form.addEventListener('submit', async (e) => {
       .from('models')
       .getPublicUrl(modelPath);
 
-    // 2. Upload thumbnail if provided
     let thumbnailUrl = null;
 
     if (thumbFile) {
-      const thumbExt  = thumbFile.name.split('.').pop();
+      const thumbExt = thumbFile.name.split('.').pop();
       const thumbPath = `${currentUser.id}/${Date.now()}_thumb.${thumbExt}`;
 
       const { error: thumbError } = await db.storage
-        .from('thumbnails')
+        .from('thubnails')
         .upload(thumbPath, thumbFile);
 
       if (thumbError) throw thumbError;
 
       const { data: { publicUrl } } = db.storage
-        .from('thumbnails')
+        .from('thubnails')
         .getPublicUrl(thumbPath);
 
       thumbnailUrl = publicUrl;
     }
 
-    // 3. Insert model record into the database
     const { data: inserted, error: insertError } = await db
       .from('models')
       .insert({
-        user_id:       currentUser.id,
+        user_id: currentUser.id,
         title,
-        description:   desc,
+        description: desc,
         tags,
-        model_url:     modelUrl,
+        model_url: modelUrl,
         thumbnail_url: thumbnailUrl,
-        format:        modelExt,
-        likes_count:   0,
+        format: modelExt,
+        likes_count: 0,
       })
       .select()
       .single();
 
     if (insertError) throw insertError;
 
-    // 4. Redirect to the new model's page
     window.location.href = `model.html?id=${inserted.id}`;
 
   } catch (err) {
     showMsg(err.message || 'Upload failed. Please try again.', 'error');
-    submitBtn.disabled   = false;
+    submitBtn.disabled = false;
     submitBtn.textContent = 'Publish Model';
   }
 });
 
-// ─── Helpers ───
 function showMsg(text, type) {
-  msgEl.textContent  = text;
-  msgEl.className    = `msg ${type}`;
+  msgEl.textContent = text;
+  msgEl.className = `msg ${type}`;
 }
 
 function clearMsg() {
