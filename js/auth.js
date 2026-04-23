@@ -1,27 +1,24 @@
-// ─────────────────────────────────────────────
-//  AUTH.JS — runs on every page
-//  Manages: session checks, navbar state, helpers
-// ─────────────────────────────────────────────
+// Global auth handler for DekNek3D
 
-// Call this on every page to populate the nav
+// Setup the navbar based on if we're logged in or not
 async function initNav() {
   const { data: { session } } = await db.auth.getSession();
   const user = session?.user ?? null;
 
-  const navAuth     = document.getElementById('nav-auth');
-  const navUpload   = document.getElementById('nav-upload');
+  const navAuth = document.getElementById('nav-auth');
+  const navUpload = document.getElementById('nav-upload');
 
   if (!navAuth) return user;
 
   if (user) {
-    // Logged in — show profile link + logout
+    // Show profile and logout if user exists
     navAuth.innerHTML = `
       <a href="profile.html?id=${user.id}" class="nav-link">Profile</a>
       <button onclick="logout()" class="nav-btn outline">Logout</button>
     `;
     if (navUpload) navUpload.style.display = 'inline';
   } else {
-    // Logged out — show login / signup
+    // Otherwise show login/signup
     navAuth.innerHTML = `
       <a href="login.html"  class="nav-btn outline">Login</a>
       <a href="signup.html" class="nav-btn">Sign up</a>
@@ -32,14 +29,13 @@ async function initNav() {
   return user;
 }
 
-// Sign out and redirect to feed
+// Just signs out and kicks back to home
 async function logout() {
   await db.auth.signOut();
   window.location.href = 'index.html';
 }
 
-// Use on pages that require login (upload, etc.)
-// Returns user or redirects to login
+// Redirects to login if trying to access a protected page
 async function requireAuth() {
   const { data: { session } } = await db.auth.getSession();
   if (!session) {
@@ -49,27 +45,31 @@ async function requireAuth() {
   return session.user;
 }
 
-// ─── UTILITY HELPERS ───
+// --- Helpers ---
 
-// "2 hours ago" style timestamps
+// Formats dates to "x mins/hours ago"
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
-  const mins  = Math.floor(diff / 60000);
-  if (mins < 1)  return 'just now';
+  const mins = Math.floor(diff / 60000);
+
+  if (mins < 1) return 'just now';
   if (mins < 60) return `${mins}m ago`;
+
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24)  return `${hrs}h ago`;
+  if (hrs < 24) return `${hrs}h ago`;
+
   const days = Math.floor(hrs / 24);
   if (days < 30) return `${days}d ago`;
+
   return new Date(dateStr).toLocaleDateString();
 }
 
-// Get username initial for avatar placeholder
+// For avatar placeholders
 function getInitial(username) {
   return username ? username.charAt(0).toUpperCase() : '?';
 }
 
-// Read a URL query param: getParam('id')
+// Quick way to grab URL params
 function getParam(key) {
   return new URLSearchParams(window.location.search).get(key);
 }
