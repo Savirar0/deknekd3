@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Model — DekNek3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="index.html" class="nav-logo">Dek<span>Nek</span>3D</a>
+    <a href="index.html" class="nav-link">Feed</a>
+    <a href="upload.html" class="nav-link active" id="nav-upload">Upload</a>
+    <div id="nav-auth"></div>
+  </nav>
+
+  <!-- UPLOAD FORM -->
+  <div class="container">
+    <div class="upload-wrap">
+
+      <div class="page-header">
+        <h1>Share a Model</h1>
+        <p>Upload your 3D model and share it with the community</p>
+      </div>
+
+      <div class="msg" id="msg"></div>
+
+      <form id="upload-form">
+
+        <!-- Model Details -->
+        <div class="form-group">
+          <label for="title">Title *</label>
+          <input type="text" id="title" placeholder="e.g. Low-poly Dragon" maxlength="80" required>
+        </div>
+
+        <div class="form-group">
+          <label for="description">Description</label>
+          <textarea id="description" placeholder="Describe your model — software used, poly count, inspiration..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="tags">Tags (comma separated)</label>
+          <input type="text" id="tags" placeholder="e.g. character, low-poly, blender">
+        </div>
+
+        <!-- 3D Model File -->
+        <p class="upload-section-title">3D Model File *</p>
+
+        <div class="file-drop-area" id="model-drop">
+          <div class="icon">⬡</div>
+          <p>Click or drag &amp; drop your model file</p>
+          <small>.glb, .obj, .fbx, .stl accepted — max 50MB</small>
+          <input type="file" id="model-file-input" accept=".glb,.obj,.fbx,.stl,.ply">
+        </div>
+        <div class="selected-file" id="model-selected">No file selected</div>
+
+        <!-- Thumbnail -->
+        <p class="upload-section-title">Thumbnail Image (optional)</p>
+
+        <div class="file-drop-area" id="thumb-drop">
+          <div class="icon">🖼</div>
+          <p>Click or drag &amp; drop a preview image</p>
+          <small>.jpg, .png, .webp accepted</small>
+          <input type="file" id="thumb-file-input" accept=".jpg,.jpeg,.png,.webp">
+        </div>
+        <div class="selected-file" id="thumb-selected">No file selected</div>
+
+        <button type="submit" class="btn btn-primary" id="submit-btn" style="margin-top:1.5rem">
+          Publish Model
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/upload.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model — DekNek3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- model-viewer: renders interactive 3D .glb files in the browser -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="index.html" class="nav-logo">Dek<span>Nek</span>3D</a>
+    <a href="index.html" class="nav-link">Feed</a>
+    <a href="upload.html" class="nav-link" id="nav-upload" style="display:none">Upload</a>
+    <div id="nav-auth"></div>
+  </nav>
+
+  <!-- MODEL CONTENT (injected by model.js) -->
+  <div class="container">
+    <div id="model-content">
+      <div class="loading">Loading model...</div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/model.js"></script>
+
+</body>
+</html>

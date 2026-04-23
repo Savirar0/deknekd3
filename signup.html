@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign Up — DekNek3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <a href="index.html" class="nav-logo">Dek<span>Nek</span>3D</a>
+    <a href="index.html" class="nav-link">Feed</a>
+    <div id="nav-auth"></div>
+  </nav>
+
+  <!-- SIGNUP FORM -->
+  <div class="auth-wrap">
+    <div class="auth-box">
+
+      <h2>Join the community</h2>
+      <p>Create your DekNek3D account</p>
+
+      <div class="msg" id="msg"></div>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="your_username" autocomplete="username">
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" placeholder="you@email.com" autocomplete="email">
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="min. 6 characters" autocomplete="new-password">
+      </div>
+
+      <button class="btn btn-primary" id="signup-btn" onclick="signup()">Create Account</button>
+
+      <p class="auth-switch">
+        Already have an account? <a href="login.html">Log in</a>
+      </p>
+
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+
+    // If already logged in, redirect to feed
+    db.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.href = 'index.html';
+    });
+
+    initNav();
+
+    async function signup() {
+      const username = document.getElementById('username').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const btn      = document.getElementById('signup-btn');
+      const msg      = document.getElementById('msg');
+
+      msg.className = 'msg';
+      msg.textContent = '';
+
+      if (!username || !email || !password) {
+        msg.textContent = 'Please fill in all fields.';
+        msg.className = 'msg error';
+        return;
+      }
+
+      if (username.length < 3) {
+        msg.textContent = 'Username must be at least 3 characters.';
+        msg.className = 'msg error';
+        return;
+      }
+
+      if (password.length < 6) {
+        msg.textContent = 'Password must be at least 6 characters.';
+        msg.className = 'msg error';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Creating account...';
+
+      // 1. Sign up with Supabase Auth
+      const { data, error } = await db.auth.signUp({ email, password });
+
+      if (error) {
+        msg.textContent = error.message;
+        msg.className = 'msg error';
+        btn.disabled = false;
+        btn.textContent = 'Create Account';
+        return;
+      }
+
+      // 2. Create a profile record in the profiles table
+      if (data.user) {
+        const { error: profileError } = await db.from('profiles').insert({
+          id:       data.user.id,
+          username: username,
+          bio:      '',
+        });
+
+        if (profileError) {
+          // Username might be taken
+          if (profileError.code === '23505') {
+            msg.textContent = 'That username is already taken. Please choose another.';
+          } else {
+            msg.textContent = profileError.message;
+          }
+          msg.className = 'msg error';
+          // Sign out since profile creation failed
+          await db.auth.signOut();
+          btn.disabled = false;
+          btn.textContent = 'Create Account';
+          return;
+        }
+      }
+
+      // 3. Success — redirect to feed
+      window.location.href = 'index.html';
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') signup();
+    });
+
+  </script>
+
+</body>
+</html>
